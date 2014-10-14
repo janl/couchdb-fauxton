@@ -18,7 +18,6 @@ define([
   //views
   "addons/documents/views",
   "addons/documents/views-changes",
-  "addons/documents/views-index",
   "addons/documents/views-doceditor",
 
   "addons/databases/base",
@@ -26,7 +25,7 @@ define([
   "addons/fauxton/components"
 ],
 
-function(app, FauxtonAPI, Documents, Changes, Index, DocEditor, Databases, Resources, Components) {
+function(app, FauxtonAPI, Documents, Changes, DocEditor, Databases, Resources, Components) {
 
   var crumbs = {
     allDocs: function (database) {
@@ -53,28 +52,10 @@ function(app, FauxtonAPI, Documents, Changes, Index, DocEditor, Databases, Resou
         route: "allDocs",
         roles: ["_reader","_writer","_admin"]
       },
-      "database/:database/_design/:ddoc/_views/:view": {
-        route: "viewFn",
-        roles: ['_admin']
-      },
-      "database/:database/_design/:ddoc/_lists/:fn": {
-        route: "tempFn",
-        roles: ['_admin']
-      },
-      "database/:database/_design/:ddoc/_filters/:fn": {
-        route: "tempFn",
-        roles: ['_admin']
-      },
-      "database/:database/_design/:ddoc/_show/:fn": {
-        route: "tempFn",
-        roles: ['_admin']
-      },
       "database/:database/_design/:ddoc/metadata": {
         route: "designDocMetadata",
         roles: ['_admin']
       },
-      "database/:database/new_view": "newViewEditor",
-      "database/:database/new_view/:designDoc": "newViewEditor",
       "database/:database/_changes(:params)": "changes"
     },
 
@@ -86,8 +67,11 @@ function(app, FauxtonAPI, Documents, Changes, Index, DocEditor, Databases, Resou
       "route:changesFilterAdd": "addFilter",
       "route:changesFilterRemove": "removeFilter",
       "route:updateQueryOptions": "updateQueryOptions",
-      "route:resetQueryOptions": "resetQueryOptions"
+      "route:resetQueryOptions": "resetQueryOptions",
+      "route:toggleSelectHeader": "toggleSelectheader"
     },
+
+    showAllDocsHeader: true,
 
     overrideBreadcrumbs: true,
 
@@ -106,10 +90,6 @@ function(app, FauxtonAPI, Documents, Changes, Index, DocEditor, Databases, Resou
           limit: 500
         }
       });
-
-      this.rightHeader = this.setView("#right-header", new Documents.Views.RightAllDocsHeader({
-         database: this.database
-      }));
 
       this.leftheader = this.setView("#breadcrumbs", new Components.LeftHeader({
         crumbs: crumbs.allDocs(this.database),
@@ -148,13 +128,9 @@ function(app, FauxtonAPI, Documents, Changes, Index, DocEditor, Databases, Resou
           newurlPrefix = "#" + database.url('app');
 
       var menuLinks = [{
-          title: 'New Doc',
-          url: newurlPrefix + '/new',
-          icon: 'fonticon-plus-circled'
-        },{
-          title: 'New View',
-          url: newurlPrefix + '/new_view',
-          icon: 'fonticon-plus-circled'
+        title: 'New Doc',
+        url: newurlPrefix + '/new',
+        icon: 'fonticon-plus-circled'
       }];
 
       return _.reduce(FauxtonAPI.getExtensions('sidebar:links'), function (menuLinks, link) {
@@ -178,20 +154,12 @@ function(app, FauxtonAPI, Documents, Changes, Index, DocEditor, Databases, Resou
       }));
 
       this.sidebar.setSelectedTab(app.utils.removeSpecialCharacters(ddoc)+"_metadata");
-      this.leftheader.updateCrumbs(crumbs.allDocs(this.database));
+      this.resetAllDocsHeader();
       this.rightHeader.hideQueryOptions();
+      this.leftheader.updateCrumbs(crumbs.allDocs(this.database));
 
       // problem line again
-      this.apiUrl = [designDocInfo.url('apiurl'), designDocInfo.documentation() ];
-    },
-
-    tempFn:  function(databaseName, ddoc, fn){
-      this.setView("#dashboard-upper-content", new Documents.Views.temp({}));
-      this.crumbs = function () {
-        return [
-          {"name": this.database.id, "link": Databases.databaseUrl(this.database)},
-        ];
-      };
+      this.apiUrl = [designDocInfo.url('apiurl'), designDocInfo.documentation()];
     },
 
     establish: function () {
@@ -223,7 +191,11 @@ function(app, FauxtonAPI, Documents, Changes, Index, DocEditor, Databases, Resou
         return;
       }
 
-      this.leftheader.updateCrumbs(crumbs.allDocs(this.database)); 
+      this.rightHeader = this.setView("#right-header", new Documents.Views.RightAllDocsHeader({
+         database: this.database
+      }));
+
+      this.leftheader.updateCrumbs(crumbs.allDocs(this.database));
       this.database.buildAllDocs(docParams);
 
       if (docParams.startkey && docParams.startkey.indexOf("_design") > -1) {
@@ -242,7 +214,7 @@ function(app, FauxtonAPI, Documents, Changes, Index, DocEditor, Databases, Resou
         params: urlParams,
         bulkDeleteDocsCollection: new Documents.BulkDeleteDocCollection([], {databaseId: this.database.get('id')})
       }));
-      
+
       this.apiUrl = function() {
        return [this.database.allDocs.urlRef("apiurl", urlParams), this.database.allDocs.documentation()];
       };
@@ -250,62 +222,6 @@ function(app, FauxtonAPI, Documents, Changes, Index, DocEditor, Databases, Resou
       // update the rightHeader with the latest & greatest info
       this.rightHeader.resetQueryOptions({ queryParams: urlParams });
       this.rightHeader.showQueryOptions();
-    },
-
-    viewFn: function (databaseName, ddoc, viewName) {
-      var params = this.createParams(),
-          urlParams = params.urlParams,
-          docParams = params.docParams,
-          decodeDdoc = decodeURIComponent(ddoc);
-
-      viewName = viewName.replace(/\?.*$/,'');
-
-      this.indexedDocs = new Documents.IndexCollection(null, {
-        database: this.database,
-        design: decodeDdoc,
-        view: viewName,
-        params: docParams,
-        paging: {
-          pageSize: this.getDocPerPageLimit(urlParams, parseInt(docParams.limit, 10))
-        }
-      });
-
-      this.viewEditor = this.setView("#dashboard-upper-content", new Index.ViewEditor({
-        model: this.database,
-        ddocs: this.designDocs,
-        viewName: viewName,
-        params: urlParams,
-        newView: false,
-        database: this.database,
-        ddocInfo: this.ddocInfo(decodeDdoc, this.designDocs, viewName)
-      }));
-
-      this.toolsView && this.toolsView.remove();
-
-      this.documentsView = this.createViewDocumentsView({
-        designDoc: decodeDdoc,
-        docParams: docParams,
-        urlParams: urlParams,
-        database: this.database,
-        indexedDocs: this.indexedDocs,
-        designDocs: this.designDocs,
-        view: viewName
-      });
-
-      this.sidebar.setSelectedTab(app.utils.removeSpecialCharacters(ddoc) + '_' + app.utils.removeSpecialCharacters(viewName));
-
-      this.apiUrl = function() {
-       return [this.indexedDocs.urlRef("apiurl", urlParams), "docs"];
-      };
-
-      this.rightHeader.showQueryOptions();
-      this.rightHeader.resetQueryOptions({
-        queryParams: urlParams,
-        showStale: true,
-        hasReduce: true,
-        viewName: viewName,
-        ddocName: ddoc
-      });
     },
 
     ddocInfo: function (designDoc, designDocs, view) {
@@ -316,37 +232,26 @@ function(app, FauxtonAPI, Documents, Changes, Index, DocEditor, Databases, Resou
       };
     },
 
-    createViewDocumentsView: function (options) {
-      return this.setView("#dashboard-lower-content", new Documents.Views.AllDocsList({
-        database: options.database,
-        collection: options.indexedDocs,
-        nestedView: Documents.Views.Row,
-        viewList: true,
-        ddocInfo: this.ddocInfo(options.designDoc, options.designDocs, options.view),
-        docParams: options.docParams,
-        params: options.urlParams
-      }));
+    toggleSelectheader: function () {
+      /* --------------------------------------------------
+        Set up right header for the document select menu
+        or reset back to all docs header
+      ----------------------------------------------------*/
+      if (this.showAllDocsHeader) {
+        this.showAllDocsHeader = false;
+        this.rightHeader = this.setView('#right-header', new Documents.Views.SelectMenuHeader());
+        this.rightHeader.forceRender();
+        return;
+      }
+      this.resetAllDocsHeader();
     },
 
-    newViewEditor: function (database, designDoc) {
-      var params = app.getParams();
-
-      this.toolsView && this.toolsView.remove();
-      this.documentsView && this.documentsView.remove();
-
-      this.viewEditor = this.setView("#dashboard-upper-content", new Index.ViewEditor({
-        currentddoc: "_design/" + designDoc || "",
-        ddocs: this.designDocs,
-        params: params,
-        database: this.database,
-        newView: true
+    resetAllDocsHeader: function () {
+      this.rightHeader = this.setView('#right-header', new Documents.Views.RightAllDocsHeader({
+        database: this.database
       }));
-
-      this.sidebar.setSelectedTab("new-view");
-      this.rightHeader.hideQueryOptions();
-
-      // clear out anything that was in the lower section
-      this.removeView("#dashboard-lower-content");
+      this.rightHeader.forceRender();
+      this.showAllDocsHeader = true;
     },
 
     updateAllDocsFromView: function (event) {
@@ -366,39 +271,11 @@ function(app, FauxtonAPI, Documents, Changes, Index, DocEditor, Databases, Resou
         this.database.buildAllDocs(docParams);
         collection = this.database.allDocs;
         collection.paging.pageSize = pageSize;
-      } else {
-        collection = this.indexedDocs = new Documents.IndexCollection(null, {
-          database: this.database,
-          design: ddoc,
-          view: view,
-          params: docParams,
-          paging: {
-            pageSize: pageSize
-          }
-        });
-
-        if (!this.documentsView) {
-          this.documentsView = this.createViewDocumentsView({
-            designDoc: ddoc,
-            docParams: docParams,
-            urlParams: urlParams,
-            database: this.database,
-            indexedDocs: this.indexedDocs,
-            designDocs: this.designDocs,
-            view: view
-          });
-        }
       }
 
       this.documentsView.setCollection(collection);
       this.documentsView.setParams(docParams, urlParams);
       this.documentsView.forceRender();
-
-      // this has been commented out because it causes the header bar to disappear after a search (i.e the "Query
-      // Options" link disappears). This issue is being addressed in a separate ticket (not sure about the Jira ID)
-//      this.apiUrl = function() {
-//        return [this.indexedDocs.urlRef("apiurl", urlParams), "docs"];
-//      };
     },
 
     perPageChange: function (perPage) {
@@ -454,6 +331,9 @@ function(app, FauxtonAPI, Documents, Changes, Index, DocEditor, Databases, Resou
 
     changes: function () {
       var docParams = app.getParams();
+
+      this.rightHeader && this.rightHeader.remove();
+
       this.database.buildChanges(docParams);
 
       this.changesView = this.setView("#dashboard-lower-content", new Changes.Changes({
@@ -473,7 +353,6 @@ function(app, FauxtonAPI, Documents, Changes, Index, DocEditor, Databases, Resou
 
       this.sidebar.setSelectedTab('changes');
       this.leftheader.updateCrumbs(crumbs.changes(this.database));
-      this.rightHeader.showQueryOptions();
 
       this.apiUrl = function () {
         return [this.database.url("changes-apiurl"), this.database.documentation()];

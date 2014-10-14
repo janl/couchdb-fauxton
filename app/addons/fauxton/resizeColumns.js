@@ -87,7 +87,7 @@ function(FauxtonAPI) {
 
     setLeftPosition: function(panelWidth){
       var primary = this.getPrimaryNavWidth();
-      $('.set-left-position').css('left',panelWidth+primary+4);
+      $('.set-left-position').css('left', panelWidth + primary + 4);
     }
   };
 

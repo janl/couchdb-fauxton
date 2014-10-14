@@ -69,18 +69,13 @@ function(app, FauxtonAPI, Components, Documents, Databases) {
           icon: 'fonticon-plus-circled'
         });
 
-        return menuLinks; 
+        return menuLinks;
      }, [{
           title: 'New Doc',
           url: newurlPrefix + '/new',
           icon: 'fonticon-plus-circled'
-        },{
-          title: 'New View',
-          url: newurlPrefix + '/new_view',
-          icon: 'fonticon-plus-circled'
         }]);
     },
-
 
     beforeRender: function(manage) {
       this.deleteDBModal = this.setView(
@@ -181,7 +176,7 @@ function(app, FauxtonAPI, Components, Documents, Databases) {
 
     getSidebarLinks: function () {
       var ddocName = this.model.id.replace(/^_design\//,""),
-          docSafe = app.utils.safeURLName(ddocName), 
+          docSafe = app.utils.safeURLName(ddocName),
           database = this.collection.database;
 
       return _.reduce(FauxtonAPI.getExtensions('sidebar:links'), function (menuLinks, link) {
@@ -192,10 +187,10 @@ function(app, FauxtonAPI, Components, Documents, Databases) {
           icon: 'fonticon-plus-circled'
         });
 
-        return menuLinks; 
+        return menuLinks;
      }, [{
-      title: 'New View',
-      url: "#" + database.url('app') + "/new_view/" + docSafe,
+      title: 'New Document',
+      url: "#" + database.url('app') + "/new",
       icon: 'fonticon-plus-circled'
      }]);
 
