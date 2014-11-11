@@ -9,6 +9,7 @@ app/addons/*
 !app/addons/plugins
 !app/addons/logs
 !app/addons/stats
+!app/addons/setup
 !app/addons/replication
 !app/addons/contribute
 !app/addons/auth

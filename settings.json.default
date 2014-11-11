@@ -12,6 +12,7 @@
   { "name": "contribute" },
   { "name": "permissions" },
   { "name": "compaction" },
+  { "name": "setup" },
   { "name": "auth" },
   { "name": "verifyinstall" }
   ],
