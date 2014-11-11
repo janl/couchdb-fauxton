@@ -12,6 +12,20 @@
 // the License.
 %>
 
-<div>
-Hallo Welt
-</div>
+<form class="js-setup-form-step-one">
+  <h4>Settings</h4>
+
+  <p>Type in your username and password. If you want, you can also specify
+  a bind address and port.</p>
+  <div>
+    <input class="js-username" placeholder="Admin Username" type="text" />
+    <input class="js-password" placeholder="Admin Password" type="password" />
+  </div>
+  <h4>Optional bind settings</h4>
+  <div>
+    <input class="js-bind-address" placeholder="Bind address" type="text" />
+    <input class="js-bind-port" placeholder="Bind port" type="text" />
+  </div>
+
+  <button class="btn btn-primary js-submit-setup disabled" type="submit">Setup</button>
+<form>

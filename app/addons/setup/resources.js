@@ -25,7 +25,25 @@ function (app, FauxtonAPI) {
     documentation: app.host + '/_utils/docs',
 
     url: function () {
-      return app.host + '/_setup/';
+      return app.host + '/_cluster_setup/';
+    },
+
+    validate: function (attrs) {
+      if (!attrs.admin.user) {
+        return 'Admin name is required';
+      }
+
+      if (!attrs.admin.password) {
+        return 'Admin password is required';
+      }
+
+      if (attrs.bind_address && attrs.bind_address === '127.0.0.1') {
+        return 'Bind address can not be 127.0.0.1';
+      }
+
+      if (attrs.port && _.isNaN(+attrs.port)) {
+        return 'Bind port must be a number';
+      }
     }
 
   });

@@ -38,7 +38,10 @@ function (app, FauxtonAPI, Setup, Views) {
       var isAdmin = FauxtonAPI.session.isAdmin();
 
       this.setupModel = new Setup.Model();
-      this.setView('#dashboard-content', new Views.SetupForm());
+
+      this.setView('#dashboard-content', new Views.SetupForm({
+        setupModel: this.setupModel
+      }));
     }
   });
 
