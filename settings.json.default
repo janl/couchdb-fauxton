@@ -67,7 +67,7 @@
 
     "couch_config": {
       "fauxton": {
-        "db": "http://localhost:5984/fauxton",
+        "db": "http://localhost:15984/fauxton",
         "app": "./couchapp.js",
         "options": {
           "okay_if_missing": true

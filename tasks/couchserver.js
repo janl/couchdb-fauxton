@@ -31,7 +31,7 @@ module.exports = function (grunt) {
 
     // Proxy options with default localhost
     var proxy_settings = options.proxy || {
-      target: "http://localhost:5984/"
+      target: "http://localhost:15984/"
     };
 
     // inform grunt that this task is async
@@ -46,9 +46,8 @@ module.exports = function (grunt) {
           filePath;
 
       if (setContentSecurityPolicy) {
-        var headerValue = "default-src 'self'; img-src 'self' data:; font-src 'self'; " +
-                          "script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline';";
-        res.setHeader('Content-Security-Policy', headerValue);
+        var headerValue = "*";
+        res.setHeader('Access-Control-Allow-Origin', headerValue);
       }
 
       if (!!url.match(/^\/addons\/.*\/assets\/js/)) {

@@ -24,7 +24,7 @@ module.exports = function(grunt) {
 
     var default_couch_config = {
       fauxton: {
-        db: 'http://localhost:5984/fauxton',
+        db: 'http://localhost:15984/fauxton',
         app: './couchapp.js',
         options: {
           okay_if_missing: true
@@ -129,7 +129,7 @@ module.exports = function(grunt) {
       dist: './dist/debug/',
       port: 8000,
       proxy: {
-        target: "http://localhost:5984/"
+        target: "http://localhost:15984/"
       }
     };
 
