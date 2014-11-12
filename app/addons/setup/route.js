@@ -21,27 +21,32 @@ function (app, FauxtonAPI, Setup, Views) {
     layout: 'one_pane',
 
     routes: {
-      'setup': 'setupView'
+      'setup': 'setupView',
+      'setup/finish': 'finishView'
     },
 
-    selectedHeader: 'Setup',
+    selectedHeader: 'Cluster Setup',
 
     crumbs: [
-      {'name': 'Setup a Cluster', 'link': 'setup'}
+      {'name': 'Cluster Setup', 'link': 'setup'}
     ],
 
     apiUrl: function() {
       return [this.setupModel.url(), this.setupModel.documentation];
     },
 
-    setupView: function () {
-      var isAdmin = FauxtonAPI.session.isAdmin();
-
+    initialize: function () {
       this.setupModel = new Setup.Model();
+    },
 
+    setupView: function () {
       this.setView('#dashboard-content', new Views.SetupForm({
         setupModel: this.setupModel
       }));
+    },
+
+    finishView: function () {
+      this.setView('#dashboard-content', new Views.FinishForm());
     }
   });
 

@@ -16,16 +16,19 @@
   <h4>Settings</h4>
 
   <p>Type in your username and password. If you want, you can also specify
-  a bind address and port.</p>
+  a bind address and port. Use the same username/password for every node!</p>
   <div>
     <input class="js-username" placeholder="Admin Username" type="text" />
     <input class="js-password" placeholder="Admin Password" type="password" />
   </div>
   <h4>Optional bind settings</h4>
   <div>
-    <input class="js-bind-address" placeholder="Bind address" type="text" />
+    <input value="0.0.0.0" class="js-bind-address" placeholder="Bind address" type="text" />
     <input class="js-bind-port" placeholder="Bind port" type="text" />
   </div>
 
   <button class="btn btn-primary js-submit-setup disabled" type="submit">Setup</button>
+  <div class="js-message">
+
+  </div>
 <form>

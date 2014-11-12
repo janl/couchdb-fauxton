@@ -18,7 +18,7 @@ define([
 
 function (app, FauxtonAPI, Setup) {
   Setup.initialize = function () {
-    FauxtonAPI.addHeaderLink({title: 'Setup a Cluster', href: "#/setup", icon: '',});
+    FauxtonAPI.addHeaderLink({title: 'Cluster Setup', href: "#/setup", icon: '',});
   };
 
   return Setup;

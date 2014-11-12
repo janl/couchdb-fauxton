@@ -25,17 +25,22 @@ function (app, FauxtonAPI) {
     documentation: app.host + '/_utils/docs',
 
     url: function () {
-      return app.host + '/_cluster_setup/';
+      return '/_cluster_setup';
     },
 
     validate: function (attrs) {
-      if (!attrs.admin.user) {
+      if (!attrs.username) {
         return 'Admin name is required';
       }
 
-      if (!attrs.admin.password) {
+      if (!attrs.password) {
         return 'Admin password is required';
       }
+
+      if (!attrs.bind_address) {
+        return 'Bind address is required';
+      }
+
 
       if (attrs.bind_address && attrs.bind_address === '127.0.0.1') {
         return 'Bind address can not be 127.0.0.1';
