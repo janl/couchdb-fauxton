@@ -88,7 +88,7 @@ function (app, FauxtonAPI) {
     submitNode: function () {
       var $messageBox = this.$('.js-message'),
           $currentScope = this.$('.js-node-' + this.nodeCount),
-          hostname = $currentScope.find('.js-input-hostname').val(),
+          host = $currentScope.find('.js-input-hostname').val(),
           port = $currentScope.find('.js-input-port').val(),
           username = app.utils.localStorageGet('setup:username'),
           password = app.utils.localStorageGet('setup:password');
@@ -97,7 +97,7 @@ function (app, FauxtonAPI) {
           action: 'add_node',
           username: username,
           password: password,
-          hostname: hostname,
+          host: host,
           port: port
         }));
 
@@ -110,7 +110,7 @@ function (app, FauxtonAPI) {
           action: 'add_node',
           username: username,
           password: password,
-          hostname: hostname,
+          host: host,
           port: port
         })
       })
